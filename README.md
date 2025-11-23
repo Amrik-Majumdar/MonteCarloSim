@@ -1,0 +1,188 @@
+# Monte Carlo Portfolio Simulator
+
+Tool for running Monte Carlo simulations on stock portfolios using real market data. Plug in a set of tickers, simulate thousands of futures, and see how your portfolio might behave instead of just guessing off a single "expected return" number.
+
+## Features
+
+- Monte Carlo simulations on custom portfolios
+- Pulls historical data (via `yfinance`) or from CSV
+- Multiple portfolio optimization methods:
+  - Max Sharpe
+  - Min Variance
+  - Risk Parity
+  - Equal Weight
+  - Max Return
+- Basic volatility regime handling
+- Transaction costs + periodic rebalancing
+- Risk metrics:
+  - VaR
+  - Max Drawdown
+  - Sharpe Ratio
+  - Skewness
+  - Kurtosis
+- Exports plots, metrics, weights, and sample paths
+
+---
+
+## Installation
+
+Requires **Python 3.7+**
+
+Clone the repo and install dependencies:
+
+```bash
+git clone https://github.com/<your-username>/monte-carlo-portfolio-sim.git
+cd monte-carlo-portfolio-sim
+pip install -r requirements.txt
+```
+
+Or install manually:
+```bash
+pip install numpy pandas matplotlib seaborn scipy scikit-learn yfinance
+```
+
+## Usage
+
+Basic run:
+
+```bash
+python monteCarloSim.py
+```
+
+You'll be prompted to:
+
+1. Choose a data source
+   - Download via tickers (yfinance)
+   - Load a local CSV
+   - Use generated sample data
+
+2. Select an optimization method
+
+3. Set core parameters:
+   - Starting capital
+   - Number of simulations
+   - Time horizon (days)
+
+Example session:
+
+```
+Select (1-4): 2
+Tickers: AAPL,MSFT,GOOGL
+Start date: 2015-01-01
+Select (1-5): 1
+Capital: 1000000
+Simulations: 10000
+Days: 252
+```
+
+## Output
+
+The script writes out:
+
+**monte_carlo_analysis.png**  
+Plots of simulated price paths, return distributions, and summary metrics.
+
+**metrics.csv**  
+Full set of stats for the run.
+
+**weights.csv**  
+Final portfolio weights from the chosen optimization method.
+
+**paths.csv**  
+Sample simulated trajectories.
+
+## Optimization methods
+
+**Max Sharpe**  
+Targets highest risk-adjusted return. Usually the go-to.
+
+**Min Variance**  
+Tries to keep volatility as low as possible.
+
+**Risk Parity**  
+Balances risk contribution across the assets.
+
+**Equal Weight**  
+Simple 1/N allocation.
+
+**Max Return**  
+Chases max return, mostly ignoring risk.
+
+## Key metrics
+
+Quick overview of what's reported:
+
+**VaR (Value at Risk)**  
+Loss threshold in bad scenarios (e.g., 95% VaR = only 5% of outcomes are worse than this).
+
+**Sharpe Ratio**  
+Return per unit of volatility.
+
+**Max Drawdown**  
+Worst peak-to-trough drop over the horizon.
+
+**Skewness**  
+Whether returns lean more toward upside or downside tail.
+
+**Kurtosis**  
+How "fat" the tails are vs a normal distribution (more extreme moves).
+
+## How it works
+
+Under the hood:
+
+- Ledoit–Wolf shrinkage for more stable covariance estimates
+- PCA to get a rough sense of factor structure
+- Simple detection of high/low volatility regimes from historical data
+- SciPy optimizers to solve for portfolio weights
+- Transaction costs (10 bps) and monthly rebalancing included
+
+## Limitations
+
+This is a model, not a trading signal.
+
+It will not handle things like:
+
+- True black swan events
+- Sudden structural breaks or regime shifts
+- Correlations blowing up in a crash
+
+Use it to understand risk and distributions, not as a guarantee of future performance.
+
+## Data sources
+
+You can run it on:
+
+**yfinance data**  
+Pulls adjusted prices from Yahoo Finance.
+
+**CSV files**  
+Your own data. Expected format:
+- One date column
+- One column per asset with prices
+
+**Generated data**  
+Synthetic data for testing/playing around.
+
+## Why I built this
+
+Most portfolio tools I tried were either:
+
+- Too "black box" (no visibility into what's actually happening), or
+- Too basic: a couple of summary stats and that's it.
+
+I wanted something I could script, tweak, and extend, with a clear view of the full distribution of outcomes and where the risk is actually coming from.
+
+No GUI on purpose. For this kind of thing, a CLI is faster and easier to iterate on.
+
+## Performance
+
+On a normal laptop, ~10,000 simulations run in a few seconds. If you need millions of paths or intraday horizons, you can always fork this and:
+
+- Add numba
+- Push more logic into vectorized form
+- Offload heavy work elsewhere
+
+## License
+
+MIT
